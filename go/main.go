@@ -1,0 +1,35 @@
+package main
+
+import (
+	"alertmanager_health/metrics"
+	"alertmanager_health/webserver"
+	"net/http"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+)
+
+// Entrypoint for the Application
+func main() {
+	mux := CreateMux()
+	http.ListenAndServe(":2112", mux)
+}
+
+// Creates the Mux that Serves /inc and /metrics
+func CreateMux() http.ServeMux {
+	mux := http.NewServeMux()
+        var web webserver.IncrementEndpoint
+	web.Metrics = CreateMetrics()
+        mux.Handle("/inc", web)
+        mux.Handle("/metrics", promhttp.Handler())
+}
+
+// Creates the Metrics Counter Vector "alertmanager_status"
+// That differentiates by the label "gepardec_cluster"c
+func CreateMetrics() Metrics {
+	var metrics metrics.Metrics
+        metrics.SetCounterVec(
+                "alertmanager_status",
+                "The status of the alertmanager",
+                "gepardec_cluster",
+        )
+	return metrics
+}
