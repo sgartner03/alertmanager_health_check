@@ -8,11 +8,15 @@ import (
 	"net/http"
 )
 
+// Type for the endpoint where the counters in the metrics are incrementend
+// metrics: Metrics Endpoint with the counter
+// logger: Logger 
 type IncrementEndpoint struct {
 	metrics metrics.Metrics
 	logger logging.Logger
 }
 
+// Instantiates the IncrementEndpoint struct
 func NewIncrementEndpoint(metrics metrics.Metrics, logger logging.Logger) IncrementEndpoint {
 	var ie IncrementEndpoint
 	ie.metrics = metrics 
@@ -20,6 +24,7 @@ func NewIncrementEndpoint(metrics metrics.Metrics, logger logging.Logger) Increm
 	return ie
 }
 
+// Serve Method for the Increment Endpoint
 func (web IncrementEndpoint) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	req := web.ReadJSON(r)
@@ -28,7 +33,7 @@ func (web IncrementEndpoint) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, seq)
 }
 
-
+// Transforms the body of an HTTP Request into a Request Struct
 func (web IncrementEndpoint) ReadJSON(r *http.Request) Request {
 	decoder := json.NewDecoder(r.Body)
     	var req Request 
@@ -39,7 +44,7 @@ func (web IncrementEndpoint) ReadJSON(r *http.Request) Request {
 	return req
 }
     
-
+// Parses the Alerts-Array into an sequence of labels
 func Parse(alerts []Alert) []string {
 	var arr []string
 	for _, alert := range alerts {
