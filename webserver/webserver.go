@@ -1,6 +1,7 @@
 package webserver
 
 import (
+	"alertmanager_health/logging"
 	"alertmanager_health/metrics"
 	"fmt"
 	"encoding/json"
@@ -8,24 +9,32 @@ import (
 )
 
 type IncrementEndpoint struct {
-	Metrics metrics.Metrics
+	metrics metrics.Metrics
+	logger logging.Logger
+}
+
+func NewIncrementEndpoint(metrics metrics.Metrics, logger logging.Logger) IncrementEndpoint {
+	var ie IncrementEndpoint
+	ie.metrics = metrics 
+	ie.logger = logger
+	return ie
 }
 
 func (web IncrementEndpoint) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	req := ReadJSON(r)
+	req := web.ReadJSON(r)
 	seq := Parse(req.Alerts)
-	web.Metrics.IncrementSequence(seq)
+	web.metrics.IncrementSequence(seq)
 	fmt.Fprint(w, seq)
 }
 
 
-func ReadJSON(r *http.Request) Request {
+func (web IncrementEndpoint) ReadJSON(r *http.Request) Request {
 	decoder := json.NewDecoder(r.Body)
     	var req Request 
     	err := decoder.Decode(&req)
     	if err != nil {
-       		panic(err)
+       		web.logger.Error(err.Error())
     	}
 	return req
 }

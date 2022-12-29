@@ -10,6 +10,12 @@ type Metrics struct {
 	CounterVec *prometheus.CounterVec
 }
 
+func NewMetrics(name string, help string, label string) Metrics {
+	var metrics Metrics
+	metrics.SetCounterVec(name, help, label)
+	return metrics
+}
+
 func (metrics *Metrics) SetCounterVec(name string, help string, label string)  {
 	metrics.CounterVec = promauto.NewCounterVec(prometheus.CounterOpts{
                 Name: name, // "alertmanager_status",

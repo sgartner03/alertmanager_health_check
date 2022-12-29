@@ -5,6 +5,7 @@ import (
 	"alertmanager_health/webserver"
 	"net/http"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"alertmanager_health/logging"
 )
 
 // Entrypoint for the Application
@@ -16,8 +17,7 @@ func main() {
 // Creates the Mux that Serves /inc and /metrics
 func CreateMux() *http.ServeMux {
 	mux := http.NewServeMux()
-    var web webserver.IncrementEndpoint
-	web.Metrics = CreateMetrics()
+    web := webserver.NewIncrementEndpoint(CreateMetrics(), logging.NewLogger())
     mux.Handle("/inc", web)
 	mux.Handle("/metrics", promhttp.Handler())
 	return mux
